@@ -5,7 +5,7 @@ const ValidationError = require('../errors/ValidationError');
 
 //поиск всех сохраненных пользователем карточек
 module.exports.getMovies = (req, res, next) => {
-  const { owner } = req.user._id;
+  const owner = req.user._id;
   Movie.find({ owner })
     .then((movies) => {
       return res.send(movies)
