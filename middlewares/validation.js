@@ -30,11 +30,11 @@ const validateMovie = celebrate({
     thumbnail: Joi.string().required().pattern(URL_REGEX),
     movieId: Joi.number().required(),
     owner: Joi.string().hex().length(24),
-  })
-})
+  }),
+});
 
 module.exports = {
   validateNewUser,
   validateLogin,
-  validateMovie
+  validateMovie,
 };

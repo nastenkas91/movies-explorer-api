@@ -10,19 +10,19 @@ const MONGO_DUPLICATE_ERROR_CODE = 11000;
 
 const { NODE_ENV, JWT_SECRET } = process.env;
 
-//регистрация
+// регистрация
 module.exports.createUser = (req, res, next) => {
   const { email, password, name } = req.body;
   return bcrypt.hash(password, 10)
     .then((hash) => User.create(
       {
-      email, password: hash, name
-    },
-      ))
+        email, password: hash, name,
+      },
+    ))
     .then((user) => res.send({
       _id: user._id,
       name: user.name,
-      email: user.email
+      email: user.email,
     }))
     .catch((err) => {
       if (err.code === MONGO_DUPLICATE_ERROR_CODE) {
@@ -33,9 +33,9 @@ module.exports.createUser = (req, res, next) => {
       }
       return next(err);
     });
-}
+};
 
-//авторизация
+// авторизация
 module.exports.login = (req, res, next) => {
   const { email, password } = req.body;
   User.findOne({ email }).select('+password')
@@ -48,20 +48,20 @@ module.exports.login = (req, res, next) => {
           if (!matched) {
             throw new AuthorisationError('Неправильные почта или пароль');
           }
-          const token = jwt.sign({ _id: user._id}, NODE_ENV === 'production' ? JWT_SECRET : 'secret-key', { expiresIn: '7d' });
+          const token = jwt.sign({ _id: user._id }, NODE_ENV === 'production' ? JWT_SECRET : 'secret-key', { expiresIn: '7d' });
           res.send({
             token,
           });
         });
     })
     .catch(next);
-}
+};
 
-//получить информацию о пользователе
+// получить информацию о пользователе
 module.exports.getMe = (req, res, next) => {
   User.findById(req.user._id)
     .then((user) => {
-      if(!user) {
+      if (!user) {
         throw new NotFound('Пользователь по указанному id не найден');
       }
       return res.send({
@@ -75,25 +75,25 @@ module.exports.getMe = (req, res, next) => {
       }
       return next(err);
     });
-}
+};
 
-//обновить информацию о пользователе
+// обновить информацию о пользователе
 module.exports.updateMe = (req, res, next) => {
   const { name, email } = req.body;
   User.findByIdAndUpdate(
     req.user._id,
     { name, email },
-    { new: true, runValidators: true }
+    { new: true, runValidators: true },
   )
     .then((user) => {
-      if(!user) {
+      if (!user) {
         throw new NotFound('Пользователь по указанному id не найден');
       }
       return res.send({
         _id: user._id,
         name: user.name,
-        email: user.email
-      })
+        email: user.email,
+      });
     })
     .catch((err) => {
       if (err.name === 'ValidationError') {

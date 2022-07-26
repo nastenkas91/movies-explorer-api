@@ -18,4 +18,4 @@ const errorLogger = expressWinston.logger({
 module.exports = {
   requestLogger,
   errorLogger,
-}
+};
