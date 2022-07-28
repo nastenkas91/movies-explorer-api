@@ -62,7 +62,7 @@ module.exports.deleteMovie = (req, res, next) => {
     })
     .catch((err) => {
       if (err.name === 'CastError') {
-        return next(new ValidationError(movieNotFoundMessage));
+        return next(new ValidationError(err.message));
       }
       return next(err);
     });

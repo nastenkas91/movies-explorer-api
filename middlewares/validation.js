@@ -1,5 +1,13 @@
 const { celebrate, Joi } = require('celebrate');
-const { URL_REGEX } = require('../utils/constants');
+const validator = require('validator');
+const { customValidationMessage } = require('../utils/constants');
+
+// const customUrlValidator = (value, helpers) => {
+//   if (validator.isURL(value)) {
+//     return value;
+//   }
+//   return helpers.message(customValidationMessage(''));
+// };
 
 const validateNewUser = celebrate({
   body: Joi.object().keys({
@@ -30,11 +38,26 @@ const validateMovie = celebrate({
     duration: Joi.number().required(),
     year: Joi.string().required(),
     description: Joi.string().required(),
-    image: Joi.string().required().pattern(URL_REGEX),
-    trailerLink: Joi.string().required().pattern(URL_REGEX),
+    image: Joi.string().required().custom((value, helpers) => {
+      if (validator.isURL(value)) {
+        return value;
+      }
+      return helpers.message(customValidationMessage('image'));
+    }),
+    trailerLink: Joi.string().required().custom((value, helpers) => {
+      if (validator.isURL(value)) {
+        return value;
+      }
+      return helpers.message(customValidationMessage('trailerLink'));
+    }),
     nameRU: Joi.string().required(),
     nameEN: Joi.string().required(),
-    thumbnail: Joi.string().required().pattern(URL_REGEX),
+    thumbnail: Joi.string().required().custom((value, helpers) => {
+      if (validator.isURL(value)) {
+        return value;
+      }
+      return helpers.message(customValidationMessage('thumbnail'));
+    }),
     movieId: Joi.number().required(),
     owner: Joi.string().hex().length(24),
   }),

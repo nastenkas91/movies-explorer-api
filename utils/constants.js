@@ -12,6 +12,8 @@ const conflictingEmailMessage = 'Пользователь с данным email 
 
 const authorisationErrorMessage = 'Неправильные почта или пароль';
 
+const customValidationMessage = (field) => `Поле ${field} заполнено неверно`;
+
 module.exports = {
   URL_REGEX,
   MONGO_DUPLICATE_ERROR_CODE,
@@ -20,4 +22,5 @@ module.exports = {
   userNotFoundMessage,
   conflictingEmailMessage,
   authorisationErrorMessage,
+  customValidationMessage,
 };
