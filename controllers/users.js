@@ -5,10 +5,19 @@ const NotFound = require('../errors/NotFound');
 const AuthorisationError = require('../errors/AuthorisationError');
 const ValidationError = require('../errors/ValidationError');
 const ConflictError = require('../errors/ConflictError');
-
-const MONGO_DUPLICATE_ERROR_CODE = 11000;
+const { devSecretKey } = require('../utils/devConfig');
+const { MONGO_DUPLICATE_ERROR_CODE } = require('../utils/constants');
+const { userNotFoundMessage } = require('../utils/constants');
 
 const { NODE_ENV, JWT_SECRET } = process.env;
+
+const handleUserDataError = (err) => {
+  if (err.code === MONGO_DUPLICATE_ERROR_CODE) {
+    throw new ConflictError('Пользователь с данным email уже существует');
+  } if (err.name === 'ValidationError') {
+    throw new ValidationError(err.message);
+  }
+};
 
 // регистрация
 module.exports.createUser = (req, res, next) => {
@@ -24,15 +33,8 @@ module.exports.createUser = (req, res, next) => {
       name: user.name,
       email: user.email,
     }))
-    .catch((err) => {
-      if (err.code === MONGO_DUPLICATE_ERROR_CODE) {
-        return next(new ConflictError('Пользователь с данным email уже существует'));
-      } if (err.name === 'ValidationError') {
-        const errMessage = err.message.replace('user validation failed:', '');
-        return next(new ValidationError(`Переданы некорректные данные в полях:${errMessage}`));
-      }
-      return next(err);
-    });
+    .catch((err) => handleUserDataError(err))
+    .catch(next);
 };
 
 // авторизация
@@ -48,7 +50,7 @@ module.exports.login = (req, res, next) => {
           if (!matched) {
             throw new AuthorisationError('Неправильные почта или пароль');
           }
-          const token = jwt.sign({ _id: user._id }, NODE_ENV === 'production' ? JWT_SECRET : 'secret-key', { expiresIn: '7d' });
+          const token = jwt.sign({ _id: user._id }, NODE_ENV === 'production' ? JWT_SECRET : devSecretKey, { expiresIn: '7d' });
           res.send({
             token,
           });
@@ -62,7 +64,7 @@ module.exports.getMe = (req, res, next) => {
   User.findById(req.user._id)
     .then((user) => {
       if (!user) {
-        throw new NotFound('Пользователь по указанному id не найден');
+        throw new NotFound(userNotFoundMessage);
       }
       return res.send({
         name: user.name,
@@ -87,7 +89,7 @@ module.exports.updateMe = (req, res, next) => {
   )
     .then((user) => {
       if (!user) {
-        throw new NotFound('Пользователь по указанному id не найден');
+        throw new NotFound(userNotFoundMessage);
       }
       return res.send({
         _id: user._id,
@@ -95,11 +97,6 @@ module.exports.updateMe = (req, res, next) => {
         email: user.email,
       });
     })
-    .catch((err) => {
-      if (err.name === 'ValidationError') {
-        const errMessage = err.message.replace('Validation failed:', '');
-        return next(new ValidationError(`Переданы некорректные данные в полях:${errMessage}`));
-      }
-      return next(err);
-    });
+    .catch((err) => handleUserDataError(err))
+    .catch(next);
 };
