@@ -7,13 +7,13 @@ const ValidationError = require('../errors/ValidationError');
 const ConflictError = require('../errors/ConflictError');
 const { devSecretKey } = require('../utils/devConfig');
 const { MONGO_DUPLICATE_ERROR_CODE } = require('../utils/constants');
-const { userNotFoundMessage } = require('../utils/constants');
+const { userNotFoundMessage, conflictingEmailMessage, authorisationErrorMessage } = require('../utils/constants');
 
 const { NODE_ENV, JWT_SECRET } = process.env;
 
 const handleUserDataError = (err) => {
   if (err.code === MONGO_DUPLICATE_ERROR_CODE) {
-    throw new ConflictError('Пользователь с данным email уже существует');
+    throw new ConflictError(conflictingEmailMessage);
   } if (err.name === 'ValidationError') {
     throw new ValidationError(err.message);
   }
@@ -43,12 +43,12 @@ module.exports.login = (req, res, next) => {
   User.findOne({ email }).select('+password')
     .then((user) => {
       if (!user) {
-        throw new AuthorisationError('Неправильные почта или пароль');
+        throw new AuthorisationError(authorisationErrorMessage);
       }
       return bcrypt.compare(password, user.password)
         .then((matched) => {
           if (!matched) {
-            throw new AuthorisationError('Неправильные почта или пароль');
+            throw new AuthorisationError(authorisationErrorMessage);
           }
           const token = jwt.sign({ _id: user._id }, NODE_ENV === 'production' ? JWT_SECRET : devSecretKey, { expiresIn: '7d' });
           res.send({
@@ -71,12 +71,7 @@ module.exports.getMe = (req, res, next) => {
         email: user.email,
       });
     })
-    .catch((err) => {
-      if (err.name === 'CastError') {
-        return next(new ValidationError('Переданы некорректные данные.'));
-      }
-      return next(err);
-    });
+    .catch(next);
 };
 
 // обновить информацию о пользователе
