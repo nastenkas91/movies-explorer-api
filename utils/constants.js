@@ -1,5 +1,3 @@
-const URL_REGEX = /^(https?:\/\/(www\.)?([a-zA-z0-9-]{1}[a-zA-z0-9-]*\.?)*\.{1}([a-zA-z0-9]){2,8}(\/?([a-zA-z0-9-])*\/?)*\/?([-._~:?#[]@!\$&'\(\)\*\+,;=])*)/;
-
 const MONGO_DUPLICATE_ERROR_CODE = 11000;
 
 const movieNotFoundMessage = 'Фильм по указанному id не найден';
@@ -15,7 +13,6 @@ const authorisationErrorMessage = 'Неправильные почта или п
 const customValidationMessage = (field) => `Поле ${field} заполнено неверно`;
 
 module.exports = {
-  URL_REGEX,
   MONGO_DUPLICATE_ERROR_CODE,
   movieNotFoundMessage,
   forbiddenMessage,

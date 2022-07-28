@@ -2,13 +2,6 @@ const { celebrate, Joi } = require('celebrate');
 const validator = require('validator');
 const { customValidationMessage } = require('../utils/constants');
 
-// const customUrlValidator = (value, helpers) => {
-//   if (validator.isURL(value)) {
-//     return value;
-//   }
-//   return helpers.message(customValidationMessage(''));
-// };
-
 const validateNewUser = celebrate({
   body: Joi.object().keys({
     email: Joi.string().required().email(),
