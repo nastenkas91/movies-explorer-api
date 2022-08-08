@@ -6,7 +6,7 @@ const { errors } = require('celebrate');
 const helmet = require('helmet');
 const limiter = require('./middlewares/rateLimit');
 const routes = require('./routes/index');
-// const cors = require('./middlewares/cors');
+const cors = require('./middlewares/cors');
 const errorHandler = require('./middlewares/errorHandler');
 const { requestLogger, errorLogger } = require('./middlewares/logger');
 const { devDataBase } = require('./utils/devConfig');
@@ -21,7 +21,7 @@ app.use(bodyParser.urlencoded({ extended: true }));
 
 mongoose.connect(NODE_ENV === 'production' ? DATA_BASE : devDataBase);
 
-// app.use(cors); //TBD после деплоя фронтенда
+app.use(cors);
 
 app.use(helmet());
 
