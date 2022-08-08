@@ -1,5 +1,4 @@
 const allowedCors = [
-  'localhost:3000',
   'http://localhost:3000',
   'http://movie.explorer.nomoredomains.xyz',
   'https://movie.explorer.nomoredomains.xyz'];
