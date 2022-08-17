@@ -11,14 +11,6 @@ const { userNotFoundMessage, conflictingEmailMessage, authorisationErrorMessage 
 
 const { NODE_ENV, JWT_SECRET } = process.env;
 
-const handleUserDataError = (err) => {
-  if (err.code === MONGO_DUPLICATE_ERROR_CODE) {
-    throw new ConflictError(conflictingEmailMessage);
-  } if (err.name === 'ValidationError') {
-    throw new ValidationError(err.message);
-  }
-};
-
 // регистрация
 module.exports.createUser = (req, res, next) => {
   const { email, password, name } = req.body;
@@ -33,8 +25,14 @@ module.exports.createUser = (req, res, next) => {
       name: user.name,
       email: user.email,
     }))
-    .catch((err) => handleUserDataError(err))
-    .catch(next);
+    .catch((err) => {
+      if (err.code === MONGO_DUPLICATE_ERROR_CODE) {
+        return next(new ConflictError(conflictingEmailMessage));
+      } if (err.name === 'ValidationError') {
+        return next(new ValidationError(err.message));
+      }
+      return next(err);
+    });
 };
 
 // авторизация
@@ -92,6 +90,12 @@ module.exports.updateMe = (req, res, next) => {
         email: user.email,
       });
     })
-    .catch((err) => handleUserDataError(err))
-    .catch(next);
+    .catch((err) => {
+      if (err.code === MONGO_DUPLICATE_ERROR_CODE) {
+        return next(new ConflictError(conflictingEmailMessage));
+      } if (err.name === 'ValidationError') {
+        return next(new ValidationError(err.message));
+      }
+      return next(err);
+    });
 };
